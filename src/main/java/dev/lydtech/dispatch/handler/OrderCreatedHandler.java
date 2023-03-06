@@ -19,7 +19,8 @@ public class OrderCreatedHandler {
     @KafkaListener(
             id = "orderConsumerClient",
             topics = "order_created",
-            groupId = "dispatch_order_created_consumer"
+            groupId = "dispatch_order_created_consumer",
+            properties = {"spring.json.value.default.type=dev.lydtech.dispatch.message.OrderCreated"}
     )
     public void listen(OrderCreated orderCreated) {
         log.info("receive message: orderId: " + orderCreated.getOrderId() + " item: " + orderCreated.getItem());
