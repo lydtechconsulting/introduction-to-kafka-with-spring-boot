@@ -59,8 +59,8 @@ import static org.hamcrest.Matchers.notNullValue;
 @EmbeddedKafka(controlledShutdown = true)
 public class OrderDispatchIntegrationTest {
 
-    private final static String ORDER_CREATED_TOPIC = "order_created";
-    private final static String ORDER_DISPATCHED_TOPIC = "order_dispatched";
+    private final static String ORDER_CREATED_TOPIC = "order.created";
+    private final static String ORDER_DISPATCHED_TOPIC = "order.dispatched";
 
     @Autowired
     private KafkaTemplate testKafkaTemplate;
@@ -83,12 +83,12 @@ public class OrderDispatchIntegrationTest {
         }
 
         @Bean
-        public KafkaTemplate<String, String> testKafkaTemplate(final ProducerFactory<String, String> testProducerFactory) {
+        public KafkaTemplate<String, OrderCreated> testKafkaTemplate(final ProducerFactory<String, OrderCreated> testProducerFactory) {
             return new KafkaTemplate<>(testProducerFactory);
         }
 
         @Bean(name = "testProducerFactory")
-        public ProducerFactory<String, String> testProducerFactory(@Value("${kafka.bootstrap-servers}") final String bootstrapServers) {
+        public ProducerFactory<String, OrderCreated> testProducerFactory(@Value("${kafka.bootstrap-servers}") final String bootstrapServers) {
             final Map<String, Object> config = new HashMap<>();
             config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
             config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -146,9 +146,9 @@ public class OrderDispatchIntegrationTest {
     }
 
     /**
-     * Send in an order_created event and ensure an outbound order_dispatched event is emitted.
+     * Send in an order.created event and ensure an outbound order.dispatched event is emitted.
      *
-     * The key sent with the order_created event should match the key received for the order_dispatched event.
+     * The key sent with the order.created event should match the key received for the order.dispatched event.
      */
     @Test
     public void testOrderDispatchFlow() throws Exception {

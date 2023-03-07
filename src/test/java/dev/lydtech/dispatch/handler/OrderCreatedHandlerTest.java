@@ -41,20 +41,21 @@ public class OrderCreatedHandlerTest {
         String key = randomUUID().toString();
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), RandomStringUtils.randomAlphabetic(8));
         handler.listen(key, testEvent);
-        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
+        verify(kafkaProducerMock, times(1)).send(eq("order.dispatched"), eq(key), any(OrderDispatched.class));
     }
 
+    /**
+     * The send to Kafka throws an exception (e.g. if Kafka is unavailable).  To ensure the message is not retried
+     * continually, this is caught and an error is logged.
+     */
     @Test
     public void testListen_ProducerThrowsException() {
         String key = randomUUID().toString();
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), RandomStringUtils.randomAlphabetic(8));
-        doThrow(new RuntimeException("Producer failure")).when(kafkaProducerMock).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
+        doThrow(new RuntimeException("Producer failure")).when(kafkaProducerMock).send(eq("order.dispatched"), eq(key), any(OrderDispatched.class));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            handler.listen(key, testEvent);
-        });
+        handler.listen(key, testEvent);
 
-        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
-        assertThat(exception.getMessage(), equalTo("Unable to send event"));
+        verify(kafkaProducerMock, times(1)).send(eq("order.dispatched"), eq(key), any(OrderDispatched.class));
     }
 }

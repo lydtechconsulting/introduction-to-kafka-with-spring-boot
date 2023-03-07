@@ -20,8 +20,8 @@ public class OrderCreatedHandler {
 
     @KafkaListener(
             id = "orderConsumerClient",
-            topics = "order_created",
-            groupId = "dispatch_order_created_consumer",
+            topics = "order.created",
+            groupId = "dispatch.order.created.consumer",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void listen(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderCreated orderCreated) {
@@ -30,10 +30,10 @@ public class OrderCreatedHandler {
                 .orderId(orderCreated.getOrderId())
                 .build();
         try {
-            kafkaProducer.send("order_dispatched", key, orderDispatched).get();
+            kafkaProducer.send("order.dispatched", key, orderDispatched).get();
         } catch (Exception e) {
+            // Log an error - this could be dead-lettered.
             log.error("Unable to send event", e);
-            throw new RuntimeException("Unable to send event", e);
         }
     }
 }

@@ -13,8 +13,8 @@ public class MyFirstMessageHandler {
 
     @KafkaListener(
             id = "MyFirstConsumerClient",
-            topics = "my_first_topic",
-            groupId = "my_first_topic_consumer",
+            topics = "my.first.topic",
+            groupId = "my.first.topic.consumer",
             properties = { ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG+"=org.apache.kafka.common.serialization.StringDeserializer" }
     )
     public void listen(String payload) {
