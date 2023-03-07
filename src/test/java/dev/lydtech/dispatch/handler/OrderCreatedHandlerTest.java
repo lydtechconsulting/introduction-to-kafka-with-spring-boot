@@ -1,8 +1,8 @@
 package dev.lydtech.dispatch.handler;
 
-import dev.lydtech.dispatch.util.TestEventData;
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
+import dev.lydtech.dispatch.util.TestEventData;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
