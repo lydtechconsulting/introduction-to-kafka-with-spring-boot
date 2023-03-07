@@ -1,5 +1,7 @@
 package dev.lydtech.dispatch.handler;
 
+import java.util.concurrent.CompletableFuture;
+
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
 import dev.lydtech.dispatch.util.TestEventData;
@@ -13,11 +15,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class OrderCreatedHandlerTest {
 
@@ -32,21 +36,25 @@ public class OrderCreatedHandlerTest {
 
     @Test
     public void testListen_Success() {
+        when(kafkaProducerMock.send(anyString(), anyString(), any(OrderDispatched.class))).thenReturn(mock(CompletableFuture.class));
+
+        String key = randomUUID().toString();
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), RandomStringUtils.randomAlphabetic(8));
-        handler.listen(testEvent);
-        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), any(OrderDispatched.class));
+        handler.listen(key, testEvent);
+        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
     }
 
     @Test
     public void testListen_ProducerThrowsException() {
+        String key = randomUUID().toString();
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), RandomStringUtils.randomAlphabetic(8));
-        doThrow(new RuntimeException("Producer failure")).when(kafkaProducerMock).send(eq("order_dispatched"), any(OrderDispatched.class));
+        doThrow(new RuntimeException("Producer failure")).when(kafkaProducerMock).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            handler.listen(testEvent);
+            handler.listen(key, testEvent);
         });
 
-        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), any(OrderDispatched.class));
-        assertThat(exception.getMessage(), equalTo("Producer failure"));
+        verify(kafkaProducerMock, times(1)).send(eq("order_dispatched"), eq(key), any(OrderDispatched.class));
+        assertThat(exception.getMessage(), equalTo("Unable to send event"));
     }
 }

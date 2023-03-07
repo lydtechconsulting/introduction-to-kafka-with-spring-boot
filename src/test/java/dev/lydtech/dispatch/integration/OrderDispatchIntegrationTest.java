@@ -1,7 +1,10 @@
 package dev.lydtech.dispatch.integration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,6 +13,7 @@ import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
 import dev.lydtech.dispatch.util.TestEventData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -36,6 +40,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -43,7 +48,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest(classes = {DispatchConfiguration.class, OrderDispatchIntegrationTest.TestConfig.class})
@@ -111,6 +118,7 @@ public class OrderDispatchIntegrationTest {
     @BeforeEach
     public void setUp() {
         testReceiver.counter.set(0);
+        testReceiver.keyedMessages = new ArrayList<>();
 
         // Wait until the partitions are assigned.
         registry.getListenerContainers().stream().forEach(container ->
@@ -122,32 +130,45 @@ public class OrderDispatchIntegrationTest {
      */
     public static class KafkaTestListener {
         AtomicInteger counter = new AtomicInteger(0);
+        List<ImmutablePair<String, OrderDispatched>> keyedMessages = new ArrayList<>();
 
         @KafkaListener(groupId = "KafkaIntegrationTest",
                 topics = ORDER_DISPATCHED_TOPIC,
                 autoStartup = "true",
                 containerFactory = "testKafkaListenerContainerFactory")
-        void receive(@Payload final OrderDispatched payload) {
-            log.debug("KafkaTestListener - Received message: " + payload);
+        void receive(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload final OrderDispatched payload) {
+            log.debug("KafkaTestListener - Received message key: " + key + " - payload: " + payload);
+            assertThat(key, notNullValue());
+            assertThat(payload, notNullValue());
+            keyedMessages.add(ImmutablePair.of(key, payload));
             counter.incrementAndGet();
         }
     }
 
     /**
      * Send in an order_created event and ensure an outbound order_dispatched event is emitted.
+     *
+     * The key sent with the order_created event should match the key received for the order_dispatched event.
      */
     @Test
     public void testOrderDispatchFlow() throws Exception {
-        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
-        sendMessage(ORDER_CREATED_TOPIC, orderCreated);
+        UUID orderId = randomUUID();
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(orderId, "my-item");
+        String key = randomUUID().toString();
+        sendMessage(ORDER_CREATED_TOPIC, key, orderCreated);
 
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testReceiver.counter::get, equalTo(1));
+
+        assertThat(testReceiver.keyedMessages.size(), equalTo(1));
+        assertThat(testReceiver.keyedMessages.get(0).getLeft(), equalTo(key));
+        assertThat(testReceiver.keyedMessages.get(0).getRight().getOrderId(), equalTo(orderId));
     }
 
-    public SendResult sendMessage(final String topic, final Object data) throws Exception {
+    public SendResult sendMessage(final String topic, final String key, final Object data) throws Exception {
         return (SendResult)testKafkaTemplate.send(MessageBuilder
                 .withPayload(data)
+                .setHeader(KafkaHeaders.KEY, key)
                 .setHeader(KafkaHeaders.TOPIC, topic)
                 .build()).get();
     }
