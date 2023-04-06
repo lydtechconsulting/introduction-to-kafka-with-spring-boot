@@ -31,10 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-.java-version
-.mvn/
-.gradle/
-gradle/
-gradlew
-gradlew.bat

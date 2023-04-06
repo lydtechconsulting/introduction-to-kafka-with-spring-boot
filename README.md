@@ -1,2 +1,3 @@
-# kafka-udemy-beginner
-Udemy beginner course on Spring Kafka
+# introduction-to-kafka-with-spring-boot
+
+Introduction to Kafka with Spring Boot
