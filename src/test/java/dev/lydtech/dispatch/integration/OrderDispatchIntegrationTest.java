@@ -52,13 +52,13 @@ public class OrderDispatchIntegrationTest {
     private KafkaListenerEndpointRegistry registry;
 
     @Autowired
-    private KafkaTestListener testReceiver;
+    private KafkaTestListener testListener;
 
     @Configuration
     static class TestConfig {
 
         @Bean
-        public KafkaTestListener testReceiver() {
+        public KafkaTestListener testListener() {
             return new KafkaTestListener();
         }
     }
@@ -85,8 +85,8 @@ public class OrderDispatchIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        testReceiver.dispatchPreparingCounter.set(0);
-        testReceiver.orderDispatchedCounter.set(0);
+        testListener.dispatchPreparingCounter.set(0);
+        testListener.orderDispatchedCounter.set(0);
 
         // Wait until the partitions are assigned.
         registry.getListenerContainers().stream().forEach(container ->
@@ -102,9 +102,9 @@ public class OrderDispatchIntegrationTest {
         sendMessage(ORDER_CREATED_TOPIC, orderCreated);
 
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
-                .until(testReceiver.dispatchPreparingCounter::get, equalTo(1));
+                .until(testListener.dispatchPreparingCounter::get, equalTo(1));
         await().atMost(1, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
-                .until(testReceiver.orderDispatchedCounter::get, equalTo(1));
+                .until(testListener.orderDispatchedCounter::get, equalTo(1));
     }
 
     private void sendMessage(String topic, Object data) throws Exception {
