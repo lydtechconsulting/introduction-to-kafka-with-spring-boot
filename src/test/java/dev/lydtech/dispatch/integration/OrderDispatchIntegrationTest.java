@@ -97,7 +97,7 @@ public class OrderDispatchIntegrationTest {
      * Send in an order.created event and ensure the expected outbound events are emitted.
      */
     @Test
-    public void testOrderDispatchFlow_Success() throws Exception {
+    public void testOrderDispatchFlow() throws Exception {
         OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
         sendMessage(ORDER_CREATED_TOPIC, orderCreated);
 
