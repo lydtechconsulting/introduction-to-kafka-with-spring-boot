@@ -39,8 +39,8 @@ import static org.hamcrest.Matchers.equalTo;
 public class OrderDispatchIntegrationTest {
 
     private final static String ORDER_CREATED_TOPIC = "order.created";
-    protected final static String ORDER_DISPATCHED_TOPIC = "order.dispatched";
-    protected final static String DISPATCH_TRACKING_TOPIC = "dispatch.tracking";
+    private final static String ORDER_DISPATCHED_TOPIC = "order.dispatched";
+    private final static String DISPATCH_TRACKING_TOPIC = "dispatch.tracking";
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
