@@ -71,13 +71,13 @@ public class OrderDispatchIntegrationTest {
         AtomicInteger orderDispatchedCounter = new AtomicInteger(0);
 
         @KafkaListener(groupId = "KafkaIntegrationTest", topics = DISPATCH_TRACKING_TOPIC)
-        void receiveDispatchPreparing(@Payload final DispatchPreparing payload) {
+        void receiveDispatchPreparing(@Payload DispatchPreparing payload) {
             log.debug("Received DispatchPreparing: " + payload);
             dispatchPreparingCounter.incrementAndGet();
         }
 
         @KafkaListener(groupId = "KafkaIntegrationTest", topics = ORDER_DISPATCHED_TOPIC)
-        void receiveOrderDispatched(@Payload final OrderDispatched payload) {
+        void receiveOrderDispatched(@Payload OrderDispatched payload) {
             log.debug("Received OrderDispatched: " + payload);
             orderDispatchedCounter.incrementAndGet();
         }
