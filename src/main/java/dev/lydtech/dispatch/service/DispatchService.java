@@ -22,19 +22,19 @@ public class DispatchService {
     private static final UUID APPLICATION_ID = randomUUID();
     private final KafkaTemplate<String, Object> kafkaProducer;
 
-    public void process(OrderCreated orderCreated) throws Exception {
+    public void process(String key, OrderCreated orderCreated) throws Exception {
         DispatchPreparing dispatchPreparing = DispatchPreparing.builder()
                 .orderId(orderCreated.getOrderId())
                 .build();
-        kafkaProducer.send(DISPATCH_TRACKING_TOPIC, dispatchPreparing).get();
+        kafkaProducer.send(DISPATCH_TRACKING_TOPIC, key, dispatchPreparing).get();
 
         OrderDispatched orderDispatched = OrderDispatched.builder()
                 .orderId(orderCreated.getOrderId())
                 .processedById(APPLICATION_ID)
                 .notes("Dispatched: " + orderCreated.getItem())
                 .build();
-        kafkaProducer.send(ORDER_DISPATCHED_TOPIC, orderDispatched).get();
+        kafkaProducer.send(ORDER_DISPATCHED_TOPIC, key, orderDispatched).get();
 
-        log.info("Sent messages: orderId: " + orderCreated.getOrderId() + " - processedById: " + APPLICATION_ID);
+        log.info("Sent messages: key: " + key + " orderId: " + orderCreated.getOrderId() + " - processedById: " + APPLICATION_ID);
     }
 }
