@@ -1,7 +1,9 @@
 package dev.lydtech.dispatch.service;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
@@ -34,6 +36,12 @@ public class DispatchService {
                 .notes("Dispatched: " + orderCreated.getItem())
                 .build();
         kafkaProducer.send(ORDER_DISPATCHED_TOPIC, key, orderDispatched).get();
+
+        DispatchCompleted dispatchCompleted = DispatchCompleted.builder()
+                .orderId(orderCreated.getOrderId())
+                .dispatchedDate(LocalDate.now().toString())
+                .build();
+        kafkaProducer.send(DISPATCH_TRACKING_TOPIC, key, dispatchCompleted).get();
 
         log.info("Sent messages: key: " + key + " - orderId: " + orderCreated.getOrderId() + " - processedById: " + APPLICATION_ID);
     }
