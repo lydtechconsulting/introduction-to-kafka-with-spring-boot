@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -30,6 +31,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static dev.lydtech.dispatch.integration.WiremockUtils.stubWiremock;
 import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,6 +41,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest(classes = {DispatchConfiguration.class})
+@AutoConfigureWireMock(port=0)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ActiveProfiles("test")
 @EmbeddedKafka(controlledShutdown = true)
@@ -121,8 +125,48 @@ public class OrderDispatchIntegrationTest {
      */
     @Test
     public void testOrderDispatchFlow() throws Exception {
+        stubWiremock("/api/stock?item=my-item", 200, "true");
+
         OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
         sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), orderCreated);
+
+        await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.dispatchPreparingCounter::get, equalTo(1));
+        await().atMost(1, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.orderDispatchedCounter::get, equalTo(1));
+        await().atMost(1, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.dispatchCompletedCounter::get, equalTo(1));
+    }
+
+    /**
+     * The call to the stock service results in a not-retryable exception being thrown, so the outbound event is never
+     * sent.
+     */
+    @Test
+    public void testOrderDispatchFlow_NotRetryableException() throws Exception {
+
+        stubWiremock("/api/stock?item=my-item", 400, "Bad Request");
+
+        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
+
+        TimeUnit.SECONDS.sleep(3);
+        assertThat(testListener.dispatchPreparingCounter.get(), equalTo(0));
+        assertThat(testListener.orderDispatchedCounter.get(), equalTo(0));
+        assertThat(testListener.dispatchCompletedCounter.get(), equalTo(0));
+    }
+
+    /**
+     * The call to the stock service results in a retryable exception being thrown before succeeding, so the outbound
+     * event is sent.
+     */
+    @Test
+    public void testOrderDispatchFlow_RetryThenSuccess() throws Exception {
+
+        stubWiremock("/api/stock?item=my-item", 503, "Service unavailable", "failOnce", STARTED, "succeedNextTime");
+        stubWiremock("/api/stock?item=my-item", 200, "true", "failOnce", "succeedNextTime", "succeedNextTime");
+
+        String key = randomUUID().toString();
+        sendMessage(ORDER_CREATED_TOPIC, key, TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
 
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.dispatchPreparingCounter::get, equalTo(1));
