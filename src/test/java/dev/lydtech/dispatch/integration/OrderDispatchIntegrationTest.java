@@ -108,10 +108,12 @@ public class OrderDispatchIntegrationTest {
         testListener.orderDispatchedCounter.set(0);
         testListener.dispatchCompletedCounter.set(0);
 
-        // Wait until the partitions are assigned.
+        // Wait until the partitions are assigned.  The application listener container has one topic and the test
+        // listener container has multiple topics, so take that into account when awaiting for topic assignment.
         registry.getListenerContainers().stream()
-                .filter(container -> container.getGroupId().equals("dispatch.order.created.consumer"))
-                .forEach(container -> ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic()));
+                .forEach(container -> ContainerTestUtils.waitForAssignment(container,
+                        container.getContainerProperties().getTopics().length * embeddedKafkaBroker.getPartitionsPerTopic()));
+
     }
 
     /**
