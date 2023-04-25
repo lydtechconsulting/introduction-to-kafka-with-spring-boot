@@ -112,6 +112,8 @@ public class OrderDispatchIntegrationTest {
         testListener.orderDispatchedCounter.set(0);
         testListener.dispatchCompletedCounter.set(0);
 
+        WiremockUtils.reset();
+
         // Wait until the partitions are assigned.  The application listener container has one topic and the test
         // listener container has multiple topics, so take that into account when awaiting for topic assignment.
         registry.getListenerContainers().stream()
@@ -121,7 +123,8 @@ public class OrderDispatchIntegrationTest {
     }
 
     /**
-     * Send in an order.created event and ensure the expected outbound events are emitted.
+     * Send in an order.created event and ensure the expected outbound events are emitted.  The call to the stock service
+     * is stubbed to return a 200 Success.
      */
     @Test
     public void testOrderDispatchFlow() throws Exception {
@@ -139,8 +142,8 @@ public class OrderDispatchIntegrationTest {
     }
 
     /**
-     * The call to the stock service results in a not-retryable exception being thrown, so the outbound event is never
-     * sent.
+     * The call to the stock service is stubbed to return a 400 Bad Request which results in a not-retryable exception
+     * being thrown, so the outbound events are never sent.
      */
     @Test
     public void testOrderDispatchFlow_NotRetryableException() throws Exception {
@@ -156,8 +159,9 @@ public class OrderDispatchIntegrationTest {
     }
 
     /**
-     * The call to the stock service results in a retryable exception being thrown before succeeding, so the outbound
-     * event is sent.
+     * The call to the stock service is stubbed to initially return a 503 Service Unavailable response, resulting in a
+     * retryable exception being thrown.  On the subsequent attempt it is stubbed to then succeed, so the outbound events
+     * are sent.
      */
     @Test
     public void testOrderDispatchFlow_RetryThenSuccess() throws Exception {
