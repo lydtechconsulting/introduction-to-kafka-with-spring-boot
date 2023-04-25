@@ -87,7 +87,7 @@ public class OrderDispatchIntegrationTest {
 
         @KafkaHandler
         void receiveOrderDispatched(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderDispatched payload) {
-            log.debug("Received OrderDispatched key: " + key + " - payload: : " + payload);
+            log.debug("Received OrderDispatched key: " + key + " - payload: " + payload);
             assertThat(key, notNullValue());
             assertThat(payload, notNullValue());
             orderDispatchedCounter.incrementAndGet();
@@ -95,7 +95,7 @@ public class OrderDispatchIntegrationTest {
 
         @KafkaHandler
         void receiveDispatchCompleted(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload DispatchCompleted payload) {
-            log.debug("Received DispatchCompleted key: " + key + " - payload: : " + payload);
+            log.debug("Received DispatchCompleted key: " + key + " - payload: " + payload);
             assertThat(key, notNullValue());
             assertThat(payload, notNullValue());
             dispatchCompletedCounter.incrementAndGet();
