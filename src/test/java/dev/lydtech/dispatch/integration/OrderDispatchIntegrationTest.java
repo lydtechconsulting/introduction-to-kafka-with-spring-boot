@@ -83,7 +83,7 @@ public class OrderDispatchIntegrationTest {
 
         @KafkaListener(groupId = "KafkaIntegrationTest", topics = ORDER_DISPATCHED_TOPIC)
         void receiveOrderDispatched(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderDispatched payload) {
-            log.debug("Received OrderDispatched key: " + key + " - payload: : " + payload);
+            log.debug("Received OrderDispatched key: " + key + " - payload: " + payload);
             assertThat(key, notNullValue());
             assertThat(payload, notNullValue());
             orderDispatchedCounter.incrementAndGet();
