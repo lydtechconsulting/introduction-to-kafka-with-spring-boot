@@ -51,7 +51,7 @@ public class DispatchService {
 
             log.info("Sent messages: key: " + key + " - orderId: " + orderCreated.getOrderId() + " - processedById: " + APPLICATION_ID);
         } else {
-            log.error("Item " + orderCreated.getItem() + " is unavailable.");
+            log.info("Item " + orderCreated.getItem() + " is unavailable.");
         }
     }
 }
