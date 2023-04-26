@@ -127,7 +127,7 @@ public class OrderDispatchIntegrationTest {
      * is stubbed to return a 200 Success.
      */
     @Test
-    public void testOrderDispatchFlow() throws Exception {
+    public void testOrderDispatchFlow_Success() throws Exception {
         stubWiremock("/api/stock?item=my-item", 200, "true");
 
         OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
