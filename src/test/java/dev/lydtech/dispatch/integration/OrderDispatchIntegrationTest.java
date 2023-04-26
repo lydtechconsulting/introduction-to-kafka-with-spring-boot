@@ -147,7 +147,6 @@ public class OrderDispatchIntegrationTest {
      */
     @Test
     public void testOrderDispatchFlow_NotRetryableException() throws Exception {
-
         stubWiremock("/api/stock?item=my-item", 400, "Bad Request");
 
         sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
@@ -165,7 +164,6 @@ public class OrderDispatchIntegrationTest {
      */
     @Test
     public void testOrderDispatchFlow_RetryThenSuccess() throws Exception {
-
         stubWiremock("/api/stock?item=my-item", 503, "Service unavailable", "failOnce", STARTED, "succeedNextTime");
         stubWiremock("/api/stock?item=my-item", 200, "true", "failOnce", "succeedNextTime", "succeedNextTime");
 
