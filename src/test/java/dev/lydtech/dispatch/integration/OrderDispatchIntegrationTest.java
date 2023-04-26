@@ -161,7 +161,8 @@ public class OrderDispatchIntegrationTest {
     public void testOrderDispatchFlow_NotRetryableException() throws Exception {
         stubWiremock("/api/stock?item=my-item", 400, "Bad Request");
 
-        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
+        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), orderCreated);
 
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.orderCreatedDLTCounter::get, equalTo(1));
@@ -180,7 +181,8 @@ public class OrderDispatchIntegrationTest {
         stubWiremock("/api/stock?item=my-item", 503, "Service unavailable", "failOnce", STARTED, "succeedNextTime");
         stubWiremock("/api/stock?item=my-item", 200, "true", "failOnce", "succeedNextTime", "succeedNextTime");
 
-        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
+        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), orderCreated);
 
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.dispatchPreparingCounter::get, equalTo(1));
@@ -201,7 +203,8 @@ public class OrderDispatchIntegrationTest {
 
         stubWiremock("/api/stock?item=my-item", 503, "Service unavailable");
 
-        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item"));
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(randomUUID(), "my-item");
+        sendMessage(ORDER_CREATED_TOPIC, randomUUID().toString(), orderCreated);
 
         await().atMost(5, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.orderCreatedDLTCounter::get, equalTo(1));
