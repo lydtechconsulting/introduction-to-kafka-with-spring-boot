@@ -40,7 +40,7 @@ public class OrderCreatedHandler {
     }
 
     @DltHandler
-    public void dlt(String data, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.info("Event from topic "+topic+" is dead lettered - event:" + data);
+    public void dlt(@Payload String payload, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        log.info("Event from topic "+topic+" is dead lettered - payload:" + payload);
     }
 }
