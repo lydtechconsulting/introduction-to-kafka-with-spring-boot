@@ -209,7 +209,6 @@ private final static String ORDER_CREATED_DLT_TOPIC = "order.created.DLT";
 
         await().atMost(5, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.orderCreatedDLTCounter::get, equalTo(1));
-
         assertThat(testListener.dispatchPreparingCounter.get(), equalTo(0));
         assertThat(testListener.orderDispatchedCounter.get(), equalTo(0));
         assertThat(testListener.dispatchCompletedCounter.get(), equalTo(0));
