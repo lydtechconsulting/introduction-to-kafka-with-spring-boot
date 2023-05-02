@@ -6,7 +6,6 @@ import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.service.DispatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -37,10 +36,5 @@ public class OrderCreatedHandler {
             log.error("NotRetryable exception: " + e.getMessage());
             throw new NotRetryableException(e);
         }
-    }
-
-    @DltHandler
-    public void dlt(@Payload String payload, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.info("Event from topic "+topic+" is dead lettered - payload:" + payload);
     }
 }
