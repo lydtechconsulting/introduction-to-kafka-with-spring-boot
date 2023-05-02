@@ -83,8 +83,6 @@ public class OrderDispatchIntegrationTest {
         AtomicInteger dispatchCompletedCounter = new AtomicInteger(0);
         AtomicInteger orderCreatedDLTCounter = new AtomicInteger(0);
 
-private final static String ORDER_CREATED_DLT_TOPIC = "order.created.DLT";
-
         @KafkaHandler
         void receiveDispatchPreparing(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload DispatchPreparing payload) {
             log.debug("Received DispatchPreparing key: " + key + " - payload: " + payload);
