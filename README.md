@@ -28,6 +28,6 @@ Plenty of useful information about your Introduction to Kafka with Spring Boot c
 | Git GUI Clients            | [Downloads](https://git-scm.com/downloads/guis)                        | Not required. But can be helpful if new to Git. SourceTree is a good option for Mac and Windows users.                                                                                                                                                         |
 
 ## Connect with the team at Lydtech Consulting
-* Visit us at [lydtechconsulting.com](https://lydtechconsulting.com/)
+* Visit us at [lydtechconsulting.com](https://www.lydtechconsulting.com/)
 * Visit our [LinkedIn](https://www.linkedin.com/company/lydtech-consulting) page
 
