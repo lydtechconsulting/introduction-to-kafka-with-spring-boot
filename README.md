@@ -1,6 +1,6 @@
 # Introduction to Kafka with Spring Boot
 
-This repository contains the example code and assignment samples to support the [Introduction to Kafka with Spring Boot](https://www.lydtechconsulting.com/) online course <-- UPDATE THIS LINK 
+This repository contains the example code and assignment samples to support the Introduction to Kafka with Spring Boot online course
 
 The application code is for a message driven service which utilises Kafka and Spring Boot 3.
 
@@ -10,10 +10,10 @@ This repository provides the code to support the course broken down section by s
 compare and contrast the code they create with the lesson code in the branches.
 
 As you work through the course, please feel free to fork this repository to your own GitHub repo. Most links contain links
-to source code changes. If you encounter a problem you can compare your code to the lesson code. [See this link for help with compares](https://github.com/lydtechconsulting/introduction-to-kafka-with-sprin/wiki#getting-an-error-but-cannot-find-what-is-different-from-lesson-source-code)  <-- NEED TO ENABLE THE WIKI AND UPDATE THIS LINK
+to source code changes. If you encounter a problem you can compare your code to the lesson code. See the [How to Compare Branches](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki#how-to-compare-branches) section in the Wiki
 
 ## Introduction to Kafka with Spring Boot Course Wiki
-Plenty of useful information about your Introduction to Kafka with Spring Boot course can be found in the [Wiki](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring/wiki) <-- NEED TO ENABLE THE WIKI AND UPDATE THIS LINK
+Plenty of useful information about your Introduction to Kafka with Spring Boot course can be found in the [Wiki](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki)
 
 
 ## Getting Your Development Environment Setup
