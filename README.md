@@ -30,5 +30,4 @@ Plenty of useful information about your Introduction to Kafka with Spring Boot c
 ## Connect with the team at Lydtech Consulting
 * Visit us at [lydtechconsulting.com](https://www.lydtechconsulting.com/)
 * Visit our [LinkedIn](https://www.linkedin.com/company/lydtech-consulting) page
-* Take a look at our [Event Driven and Kafka Blogs and Articles](https://www.lydtechconsulting.com/blog.html)
 
