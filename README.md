@@ -6,8 +6,8 @@ The application code is for a message driven service which utilises Kafka and Sp
 
 It is used to help students learn how to produce and consume messages in Java using Spring Kafka and Spring Boot 3. 
 The course provides step by step instructions and detailed explanations for students to build up the code themselves. 
-This repository provided the code to support the course broken section by ection using branches, allowing students to 
-compare and contract the code they create with the lesson code in the branches.
+This repository provides the code to support the course broken down section by section using branches, allowing students to 
+compare and contrast the code they create with the lesson code in the branches.
 
 As you work through the course, please feel free to fork this repository to your own GitHub repo. Most links contain links
 to source code changes. If you encounter a problem you can compare your code to the lesson code. [See this link for help with compares](https://github.com/lydtechconsulting/introduction-to-kafka-with-sprin/wiki#getting-an-error-but-cannot-find-what-is-different-from-lesson-source-code)  <-- NEED TO ENABLE THE WIKI AND UPDATE THIS LINK
@@ -30,4 +30,5 @@ Plenty of useful information about your Introduction to Kafka with Spring Boot c
 ## Connect with the team at Lydtech Consulting
 * Visit us at [lydtechconsulting.com](https://www.lydtechconsulting.com/)
 * Visit our [LinkedIn](https://www.linkedin.com/company/lydtech-consulting) page
+* Take a look at our [Event Driven and Kafka Blogs and Articles](https://www.lydtechconsulting.com/blog.html)
 
