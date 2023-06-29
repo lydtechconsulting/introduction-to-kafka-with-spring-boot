@@ -1,19 +1,19 @@
 # Introduction to Kafka with Spring Boot
 
-This repository contains the example code and assignment samples to support the Introduction to Kafka with Spring Boot online course
+This repository contains the code to support the [Introduction to Kafka with Spring Boot](https://www.udemy.com/course/introduction-to-kafka-with-spring-boot) online course.
 
 The application code is for a message driven service which utilises Kafka and Spring Boot 3.
 
-It is used to help students learn how to produce and consume messages in Java using Spring Kafka and Spring Boot 3.
+The code in this repository is used to help students learn how to produce and consume messages in Java using Spring Kafka and Spring Boot 3.
 The course provides step by step instructions and detailed explanations for students to build up the code themselves.
 This repository provides the code to support the course broken down section by section using branches, allowing students to
 compare and contrast the code they create with the lesson code in the branches.
 
 As you work through the course, please feel free to fork this repository to your own GitHub repo. Most lectures contain links
-to source code changes. If you encounter a problem you can compare your code to the lecture code. See the [How to Compare Branches](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki#how-to-compare-branches) section in the Wiki
+to source code changes. If you encounter a problem you can compare your code to the lecture code. See the [How to Compare Branches](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki#how-to-compare-branches) section in the Wiki.
 
 ## Introduction to Kafka with Spring Boot Course Wiki
-Plenty of useful information about your Introduction to Kafka with Spring Boot course can be found in the [Wiki](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki)
+Plenty of useful information about your Introduction to Kafka with Spring Boot course can be found in the [Wiki](https://github.com/lydtechconsulting/introduction-to-kafka-with-spring-boot/wiki).
 
 ## Getting Your Development Environment Setup
 ### Recommended Versions
