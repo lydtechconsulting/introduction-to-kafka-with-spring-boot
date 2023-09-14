@@ -1,6 +1,6 @@
 # Introduction to Kafka with Spring Boot
 
-This repository contains the code to support the [Introduction to Kafka with Spring Boot](https://www.udemy.com/course/introduction-to-kafka-with-spring-boot) online course.
+This repository contains the code to support the [Introduction to Kafka with Spring Boot](https://www.udemy.com/course/introduction-to-kafka-with-spring-boot/?referralCode=15118530CA63AD1AF16D) online course.
 
 The application code is for a message driven service which utilises Kafka and Spring Boot 3.
 
