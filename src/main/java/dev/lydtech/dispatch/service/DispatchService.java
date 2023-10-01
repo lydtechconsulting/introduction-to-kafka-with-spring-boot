@@ -1,4 +1,4 @@
-package service;
+package dev.lydtech.dispatch.service;
 
 import org.springframework.stereotype.Service;
 

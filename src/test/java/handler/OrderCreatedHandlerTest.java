@@ -1,10 +1,10 @@
 package handler;
 
+import dev.lydtech.dispatch.handler.OrderCreatedHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.DispatchService;
+import dev.lydtech.dispatch.service.DispatchService;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class OrderCreatedHandlerTest {
