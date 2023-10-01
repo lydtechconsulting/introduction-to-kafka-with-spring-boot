@@ -1,8 +1,11 @@
-package service;
+package dev.lydtech.dispatch.service;
 
 import dev.lydtech.dispatch.service.DispatchService;
+import dev.lydtech.dispatch.util.TestEventData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 class DispatchServiceTest {
 
@@ -13,6 +16,7 @@ class DispatchServiceTest {
     }
     @Test
     void process() {
-        service.process("payload");
+        UUID randomUUID = UUID.randomUUID();
+        service.process(TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
     }
 }
