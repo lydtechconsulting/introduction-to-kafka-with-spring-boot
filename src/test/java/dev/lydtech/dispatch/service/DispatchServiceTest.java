@@ -31,6 +31,7 @@ class DispatchServiceTest {
     }
     @Test
     void process() throws Exception {
+        when(kafkaProducerMock.send(anyString(), ArgumentMatchers.any(DispatchPreparing.class))).thenReturn(mock(CompletableFuture.class));
         when(kafkaProducerMock.send(anyString(), ArgumentMatchers.any(OrderDispatched.class))).thenReturn(mock(CompletableFuture.class));
         UUID randomUUID = UUID.randomUUID();
         service.process(TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
@@ -41,6 +42,7 @@ class DispatchServiceTest {
     @Test
     void process_ProducerThrowsException_orderDispatched() {
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), "dummyOrderCreated");
+        when(kafkaProducerMock.send(anyString(), ArgumentMatchers.any(DispatchPreparing.class))).thenReturn(mock(CompletableFuture.class));
         doThrow(new RuntimeException("OrderDispatched Producer failure"))
                 .when(kafkaProducerMock).send(eq("order.dispatched"), ArgumentMatchers.any(OrderDispatched.class));
         Exception exception = assertThrows(RuntimeException.class, () -> service.process(testEvent));
