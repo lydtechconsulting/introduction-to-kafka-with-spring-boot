@@ -1,11 +1,10 @@
 package dev.lydtech.dispatch.handler;
 
-import dev.lydtech.dispatch.handler.OrderCreatedHandler;
 import dev.lydtech.dispatch.message.OrderCreated;
+import dev.lydtech.dispatch.service.DispatchService;
 import dev.lydtech.dispatch.util.TestEventData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import dev.lydtech.dispatch.service.DispatchService;
 
 import java.util.UUID;
 
@@ -23,17 +22,19 @@ class OrderCreatedHandlerTest {
     }
     @Test
     void listen_success() throws Exception {
+        String key = UUID.randomUUID().toString();
         UUID randomUUID = UUID.randomUUID();
-        handler.listen(TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
+        handler.listen(key, 0, TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
         verify(dispatchServiceMock, times(1))
-                .process(TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
+                .process(key, TestEventData.buildOrderCreatedEvent(randomUUID, "dummyItem"));
     }
 
     @Test
     void listen_ServiceThrowsException() throws Exception {
+        String key = UUID.randomUUID().toString();
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), "dummyItem");
-        doThrow(new RuntimeException("Service failure")).when(dispatchServiceMock).process(testEvent);
-        handler.listen(testEvent);
-        verify(dispatchServiceMock, times(1)).process(testEvent);
+        doThrow(new RuntimeException("Service failure")).when(dispatchServiceMock).process(key, testEvent);
+        handler.listen(key, 0,testEvent);
+        verify(dispatchServiceMock, times(1)).process(key, testEvent);
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -30,7 +31,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest(classes = {DispatchConfiguration.class})
@@ -68,14 +71,18 @@ public class OrderDispatchIntegrationTest {
         AtomicInteger orderDispatchedCounter = new AtomicInteger();
 
         @KafkaListener(groupId = "KafkaIntegrationTest", topics = DISPATCH_TRACKING_TOPIC)
-        void receiveDispatchPreparing(@Payload DispatchPreparing payload) {
-            log.debug("Received DispatchPreparing: " + payload);
+        void receiveDispatchPreparing(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload DispatchPreparing payload) {
+            log.debug("Received DispatchPreparing: " + payload + " key: " + key);
+            assertThat(key, notNullValue());
+            assertThat(payload, notNullValue());
             dispatchPreparingCounter.incrementAndGet();
         }
 
         @KafkaListener(groupId = "KafkaIntegrationTest", topics = ORDER_DISPATCHED_TOPIC)
-        void receiveDispatchPreparing(@Payload OrderDispatched payload) {
-            log.debug("Received OrderDispatched: " + payload);
+        void receiveDispatchPreparing(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderDispatched payload) {
+            log.debug("Received OrderDispatched: " + payload + " key: " + key);
+            assertThat(key, notNullValue());
+            assertThat(payload, notNullValue());
             orderDispatchedCounter.incrementAndGet();
         }
     }
@@ -103,6 +110,7 @@ public class OrderDispatchIntegrationTest {
     private void sendMessage(String topic, Object data) throws Exception {
         kafkaTemplate.send(MessageBuilder.withPayload(data)
                 .setHeader(KafkaHeaders.TOPIC, topic)
+                .setHeader(KafkaHeaders.KEY, UUID.randomUUID().toString())
                 .build()).get();
     }
  }
