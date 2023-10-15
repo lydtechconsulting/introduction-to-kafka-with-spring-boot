@@ -2,6 +2,7 @@ package dev.lydtech.dispatch.integration;
 
 
 import dev.lydtech.dispatch.DispatchConfiguration;
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -65,12 +67,16 @@ public class OrderDispatchIntegrationTest {
             return new KafkaTestListener();
         }
     }
+
+    @KafkaListener(groupId = "KafkaIntegrationTest", topics = { DISPATCH_TRACKING_TOPIC, ORDER_DISPATCHED_TOPIC})
     public static class KafkaTestListener {
         AtomicInteger dispatchPreparingCounter = new AtomicInteger();
 
+        AtomicInteger dispatchCompletedCounter = new AtomicInteger();
+
         AtomicInteger orderDispatchedCounter = new AtomicInteger();
 
-        @KafkaListener(groupId = "KafkaIntegrationTest", topics = DISPATCH_TRACKING_TOPIC)
+        @KafkaHandler
         void receiveDispatchPreparing(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload DispatchPreparing payload) {
             log.debug("Received DispatchPreparing: " + payload + " key: " + key);
             assertThat(key, notNullValue());
@@ -78,13 +84,22 @@ public class OrderDispatchIntegrationTest {
             dispatchPreparingCounter.incrementAndGet();
         }
 
-        @KafkaListener(groupId = "KafkaIntegrationTest", topics = ORDER_DISPATCHED_TOPIC)
-        void receiveDispatchPreparing(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderDispatched payload) {
+        @KafkaHandler
+        void receiveDispatchCompleted(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload DispatchCompleted payload) {
+            log.debug("Received DispatchCompleted: " + payload + " key: " + key);
+            assertThat(key, notNullValue());
+            assertThat(payload, notNullValue());
+            dispatchCompletedCounter.incrementAndGet();
+        }
+
+        @KafkaHandler
+        void receiveOrderDispatched(@Header(KafkaHeaders.RECEIVED_KEY) String key, @Payload OrderDispatched payload) {
             log.debug("Received OrderDispatched: " + payload + " key: " + key);
             assertThat(key, notNullValue());
             assertThat(payload, notNullValue());
             orderDispatchedCounter.incrementAndGet();
         }
+
     }
 
     @BeforeEach
@@ -93,7 +108,9 @@ public class OrderDispatchIntegrationTest {
         testListener.orderDispatchedCounter.set(0);
         registry.getListenerContainers().stream().forEach(
                 messageListenerContainer ->
-                        ContainerTestUtils.waitForAssignment(messageListenerContainer, embeddedKafkaBroker.getPartitionsPerTopic())
+                        ContainerTestUtils.waitForAssignment(messageListenerContainer,
+                                messageListenerContainer.getContainerProperties().getTopics().length *
+                                        embeddedKafkaBroker.getPartitionsPerTopic())
         );
     }
     @Test
@@ -103,6 +120,8 @@ public class OrderDispatchIntegrationTest {
 
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.dispatchPreparingCounter::get, equalTo(1));
+        Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                        .until(testListener.dispatchCompletedCounter::get, equalTo(1));
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.orderDispatchedCounter::get, equalTo(1));
     }
