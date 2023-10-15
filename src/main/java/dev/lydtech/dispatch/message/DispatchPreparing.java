@@ -14,4 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class DispatchPreparing {
     UUID orderId;
+
+    UUID processedById;
+
+    String notes;
 }
