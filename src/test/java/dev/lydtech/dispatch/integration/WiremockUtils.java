@@ -28,7 +28,7 @@ public class WiremockUtils {
                     .whenScenarioStateIs(initialState)
                     .willReturn(aResponse().withStatus(httpStatusResponse)
                             .withHeader("Content-type", "text/plain")
-                            .withBody(body)));
+                            .withBody(body)).willSetStateTo(nextState));
         } else {
             stubFor(get(urlEqualTo(url))
                     .willReturn(aResponse().withStatus(httpStatusResponse)

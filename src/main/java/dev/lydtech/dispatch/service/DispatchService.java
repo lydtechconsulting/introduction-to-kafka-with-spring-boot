@@ -29,6 +29,7 @@ public class DispatchService {
     public void process(String key, OrderCreated orderCreated) throws Exception {
 
         String available = stockServiceClient.checkAvailability(orderCreated.getItem());
+
         if(Boolean.valueOf(available)) {
             DispatchPreparing dispatchPreparing = DispatchPreparing.builder()
                     .orderId(orderCreated.getOrderId())

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -33,15 +34,19 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static dev.lydtech.dispatch.integration.WiremockUtils.reset;
+import static dev.lydtech.dispatch.integration.WiremockUtils.stubWiremock;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest(classes = {DispatchConfiguration.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 @EmbeddedKafka(controlledShutdown = true)
+@AutoConfigureWireMock(port = 0)
 public class OrderDispatchIntegrationTest {
 
     private static final String ORDER_CREATED_TOPIC = "order.created";
@@ -112,9 +117,13 @@ public class OrderDispatchIntegrationTest {
                                 messageListenerContainer.getContainerProperties().getTopics().length *
                                         embeddedKafkaBroker.getPartitionsPerTopic())
         );
+
+        reset();
     }
     @Test
-    public void testOrderDispatchFlow() throws Exception {
+    public void testOrderDispatchFlow_success() throws Exception {
+        stubWiremock("/api/stock?item=my-item", 200, "true");
+
         OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), "my-item");
         sendMessage(ORDER_CREATED_TOPIC, orderCreated);
 
@@ -123,6 +132,36 @@ public class OrderDispatchIntegrationTest {
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                         .until(testListener.dispatchCompletedCounter::get, equalTo(1));
         Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.orderDispatchedCounter::get, equalTo(1));
+    }
+
+    @Test
+    public void testOrderDispatchFlow_NotRetryableException() throws Exception {
+        stubWiremock("/api/stock?item=my-item", 400, "bad request");
+
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), "my-item");
+        sendMessage(ORDER_CREATED_TOPIC, orderCreated);
+
+        TimeUnit.SECONDS.sleep(3);
+
+        assertThat(testListener.dispatchPreparingCounter.get(), equalTo(0));
+        assertThat(testListener.orderDispatchedCounter.get(), equalTo(0));
+        assertThat(testListener.dispatchCompletedCounter.get(), equalTo(0));
+    }
+
+    @Test
+    public void testOrderDispatchFlow_RetryableException() throws Exception {
+        stubWiremock("/api/stock?item=my-item", 503, "Service unavailable", "failOnce", STARTED, "succeedNextTime");
+        stubWiremock("/api/stock?item=my-item", 200, "true", "failOnce", "succeedNextTime", "succeedNextTime");
+        OrderCreated orderCreated = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), "my-item");
+        sendMessage(ORDER_CREATED_TOPIC, orderCreated);
+
+
+        Awaitility.await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.dispatchPreparingCounter::get, equalTo(1));
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(testListener.dispatchCompletedCounter::get, equalTo(1));
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(testListener.orderDispatchedCounter::get, equalTo(1));
     }
 
